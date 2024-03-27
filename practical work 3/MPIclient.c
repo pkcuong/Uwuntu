@@ -1,42 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <mpi.h>
+#include <fcntl.h>
 
-#define MAX_FILENAME_LENGTH 256
-#define CHUNK_SIZE 1024
+#define MAX 1024
+#define PORT 8080
 
-void receive_file(const char *filename) {
-    char buff[CHUNK_SIZE];
-    FILE *file = fopen(filename, "wb");
-    if (file == NULL) {
-        fprintf(stderr, "Error creating/opening file.\n");
-        MPI_Abort(MPI_COMM_WORLD, 1);
+void receive_file(char *filename) {
+    char buff[MAX];
+    int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (fd < 0) {
+        printf("Error creating/opening file.\n");
+        return;
     }
 
     MPI_Status status;
-    int bytes_received;
     while (1) {
-        MPI_Recv(buff, CHUNK_SIZE, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
-        MPI_Get_count(&status, MPI_CHAR, &bytes_received);
-        if (bytes_received == 0) break;
-        fwrite(buff, sizeof(char), bytes_received, file);
+        MPI_Recv(buff, MAX, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+        int count;
+        MPI_Get_count(&status, MPI_CHAR, &count);
+        if (count <= 0) break;
+        write(fd, buff, count);
     }
-
-    fclose(file);
+    close(fd);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
+    int rank, size;
     MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    if (rank == 1) {
+        char *filename = "client_file.txt";
 
-    char filename[MAX_FILENAME_LENGTH] = "MPI_client_file.txt"; 
+        printf("Connected to the server..\n");
 
-    if (world_rank == 0) {
-        //master
-    } else {
-        // slave 
+        MPI_Send(filename, strlen(filename) + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
         receive_file(filename);
     }
 
