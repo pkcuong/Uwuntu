@@ -1,12 +1,12 @@
-**Algorithm: MapReduce for Calculating Average**
+Algorithm: MapReduce for Calculating Average
 
-1. **Map Phase:**
+1. Map Phase:
    - Read each line from the input file.
    - For each line:
      - Split the line into subject and points.
      - Emit (subject, points) as key-value pairs.
 
-2. **Reduce Phase:**
+2. Reduce Phase:
    - For each key (subject):
      - Initialize sum and count to 0.
      - For each value (points) associated with the key:
@@ -15,9 +15,9 @@
      - Calculate average = sum / count.
      - Emit (subject, average).
 
-**Pseudo-code:**
+Pseudo-code:
 
-**Map Function:**
+Map Function:
 
 map(line, output):
     tokens = split line by comma
@@ -27,7 +27,7 @@ map(line, output):
         output.put(subject, points)
 
 
-**Reduce Function:**
+Reduce Function:
 
 reduce(input):
     sum = new HashMap<String, Double>()
@@ -48,7 +48,7 @@ reduce(input):
         print("Subject: " + subject + ", Average Points: " + average)
 
 
-**Main:**
+Main:
 
 main():
     input = new HashMap<String, Double>()
