@@ -1,0 +1,60 @@
+**Algorithm: MapReduce for Calculating Average**
+
+1. **Map Phase:**
+   - Read each line from the input file.
+   - For each line:
+     - Split the line into subject and points.
+     - Emit (subject, points) as key-value pairs.
+
+2. **Reduce Phase:**
+   - For each key (subject):
+     - Initialize sum and count to 0.
+     - For each value (points) associated with the key:
+       - Add points to sum.
+       - Increment count.
+     - Calculate average = sum / count.
+     - Emit (subject, average).
+
+**Pseudo-code:**
+
+**Map Function:**
+
+map(line, output):
+    tokens = split line by comma
+    if tokens.length == 2:
+        subject = tokens[0].trim()
+        points = parse tokens[1] as double
+        output.put(subject, points)
+
+
+**Reduce Function:**
+
+reduce(input):
+    sum = new HashMap<String, Double>()
+    count = new HashMap<String, Integer>()
+
+    for each entry in input:
+        subject = entry.getKey()
+        points = entry.getValue()
+
+        sum[subject] += points
+        count[subject] += 1
+
+    for each entry in sum:
+        subject = entry.getKey()
+        totalPoints = entry.getValue()
+        totalCount = count[subject]
+        average = totalPoints / totalCount
+        print("Subject: " + subject + ", Average Points: " + average)
+
+
+**Main:**
+
+main():
+    input = new HashMap<String, Double>()
+
+    open input.csv file
+    for each line in input.csv:
+        map(line, input)
+
+    reduce(input)
